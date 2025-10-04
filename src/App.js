@@ -1,31 +1,31 @@
-import React, { useState, useEffect } from 'react';
-import SimulationInputs from './components/SimulationInputs';
-import WealthChart from './components/WealthChart';
-import GoalProgress from './components/GoalProgress';
-import FutureSelfSnapshot from './components/FutureSelfSnapshot';
-import ComparisonButtons from './components/ComparisonButtons';
-import { simulateCryptoLife } from './utils/simulation';
+import React, { useState, useEffect } from "react";
+import SimulationInputs from "./components/SimulationInputs";
+import WealthChart from "./components/WealthChart";
+import GoalProgress from "./components/GoalProgress";
+import FutureSelfSnapshot from "./components/FutureSelfSnapshot";
+import ComparisonButtons from "./components/ComparisonButtons";
+import { simulateCryptoLife } from "./utils/simulation";
 
 function App() {
   const [inputs, setInputs] = useState({
     ageStart: 25,
     ageEnd: 65,
     annualIncome: 30000,
-    allocRisk: 0.30,      // 30% risky trades
-    allocStable: 0.20,    // 20% stable crypto
-    allocCash: 0.20,      // 20% cash/bonds
-    allocSelf: 0.10,      // 10% self investment
-    goalAmount: 500000
+    allocRisk: 0.3, // 30% risky trades
+    allocStable: 0.2, // 20% stable crypto
+    allocCash: 0.2, // 20% cash/bonds
+    allocSelf: 0.1, // 10% self investment
+    goalAmount: 500000,
   });
 
   const [simulationResult, setSimulationResult] = useState(null);
   const [simulationResults, setSimulationResults] = useState({});
-  const [currentScenario, setCurrentScenario] = useState('balanced');
+  const [currentScenario, setCurrentScenario] = useState("balanced");
 
   const handleInputChange = (field, value) => {
-    setInputs(prev => ({
+    setInputs((prev) => ({
       ...prev,
-      [field]: value
+      [field]: value,
     }));
   };
 
@@ -36,9 +36,9 @@ function App() {
 
     // Store result for the current scenario
     const scenarioKey = getScenarioKey(simulationInputs);
-    setSimulationResults(prev => ({
+    setSimulationResults((prev) => ({
       ...prev,
-      [scenarioKey]: result
+      [scenarioKey]: result,
     }));
 
     return result;
@@ -50,9 +50,24 @@ function App() {
   };
 
   const presetScenarios = {
-    'degen': { allocRisk: 0.70, allocStable: 0.15, allocCash: 0.10, allocSelf: 0.05 },
-    'balanced': { allocRisk: 0.25, allocStable: 0.30, allocCash: 0.25, allocSelf: 0.20 },
-    'lockin': { allocRisk: 0.05, allocStable: 0.35, allocCash: 0.30, allocSelf: 0.30 }
+    degen: {
+      allocRisk: 0.7,
+      allocStable: 0.15,
+      allocCash: 0.1,
+      allocSelf: 0.05,
+    },
+    balanced: {
+      allocRisk: 0.25,
+      allocStable: 0.3,
+      allocCash: 0.25,
+      allocSelf: 0.2,
+    },
+    lockin: {
+      allocRisk: 0.05,
+      allocStable: 0.35,
+      allocCash: 0.3,
+      allocSelf: 0.3,
+    },
   };
 
   const handleScenarioChange = (scenarioName) => {
@@ -80,7 +95,15 @@ function App() {
     }, 500);
 
     return () => clearTimeout(timer);
-  }, [inputs.ageStart, inputs.annualIncome, inputs.goalAmount, inputs.allocRisk, inputs.allocStable, inputs.allocCash, inputs.allocSelf]);
+  }, [
+    inputs.ageStart,
+    inputs.annualIncome,
+    inputs.goalAmount,
+    inputs.allocRisk,
+    inputs.allocStable,
+    inputs.allocCash,
+    inputs.allocSelf,
+  ]);
 
   // Run initial simulation on mount
   useEffect(() => {
@@ -93,13 +116,18 @@ function App() {
         {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
-            🚀 WEB3 LIFE SIMULATOR
+            🏃 FREEDOM RUN SIMULATOR
           </h1>
-          <p className="text-xl text-slate-300 mb-2">See How Your Allocation Ripples Across Decades</p>
+          <p className="text-xl text-slate-300 mb-2">
+            See How Your Allocation Ripples Across Decades
+          </p>
           <p className="text-slate-400 max-w-3xl mx-auto">
-            Every spike you chase costs you a night of sleep.
-            The most bullish position is 8 hours of sleep.
-            <span className="text-purple-400 font-semibold"> APY of peace > APY of panic.</span>
+            Every spike you chase costs you a night of sleep. The most bullish
+            position is 8 hours of sleep.
+            <span className="text-purple-400 font-semibold">
+              {" "}
+              APY of peace > APY of panic.
+            </span>
           </p>
         </div>
 
@@ -149,10 +177,14 @@ function App() {
           <div className="bg-slate-800/50 backdrop-blur-sm rounded-lg p-6 border border-slate-700">
             <h3 className="text-white font-semibold mb-3">💡 The Real Alpha</h3>
             <p className="text-slate-300 text-sm leading-relaxed max-w-4xl mx-auto">
-              Built for Web3 gamblers to visualize how allocation choices ripple across decades.
-              When you crank the 'risk' slider, wealth might spike — but health and sleep collapse.
-              When you invest in yourself and balance risk, stress drops and the curve smooths.
-              <span className="text-teal-400 font-semibold"> You can't 100× if you 0× your health.</span>
+              Built for Web3 gamblers to visualize how allocation choices ripple
+              across decades. When you crank the 'risk' slider, wealth might
+              spike — but health and sleep collapse. When you invest in yourself
+              and balance risk, stress drops and the curve smooths.
+              <span className="text-teal-400 font-semibold">
+                {" "}
+                You can't 100× if you 0× your health.
+              </span>
             </p>
             <div className="mt-4 flex justify-center items-center gap-4 text-xs text-slate-400">
               <span>🔥 Stablecoins are for your wallet</span>

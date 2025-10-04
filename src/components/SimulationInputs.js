@@ -36,10 +36,10 @@ const SimulationInputs = ({
   };
 
   const presetGoals = [
-    { label: 'Lambo Fund', value: 200000 },
-    { label: 'Escape Velocity', value: 500000 },
-    { label: 'Generational Wealth', value: 1000000 },
-    { label: 'Diamond Hands Goal', value: 2000000 },
+    { label: 'Emergency Fund', value: 25000 },
+    { label: 'House Down Payment', value: 100000 },
+    { label: 'Freedom Fund', value: 500000 },
+    { label: 'Early Retirement', value: 1000000 },
     { label: 'Custom', value: 'custom' }
   ];
 
@@ -49,7 +49,7 @@ const SimulationInputs = ({
   return (
     <div className="bg-slate-800 p-6 rounded-lg border border-slate-700">
       <h2 className="text-xl font-bold text-white mb-4 text-center">
-        🚀 WEB3 LIFE SIMULATOR
+        🏃 Freedom run simulator
       </h2>
       <p className="text-slate-400 text-sm text-center mb-6">
         See how your allocation choices ripple across decades
@@ -78,14 +78,14 @@ const SimulationInputs = ({
 
           <div>
             <label className="block text-sm font-medium text-slate-300 mb-2">
-              Annual Income
+              Monthly Income
             </label>
             <input
               type="number"
-              value={inputs.annualIncome}
-              onChange={(e) => handleInputChange('annualIncome', parseInt(e.target.value) || 0)}
+              value={Math.round(inputs.annualIncome / 12)}
+              onChange={(e) => handleInputChange('annualIncome', (parseInt(e.target.value) || 0) * 12)}
               className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-teal-500"
-              placeholder="30000"
+              placeholder="2500"
             />
           </div>
         </div>
@@ -123,7 +123,7 @@ const SimulationInputs = ({
           <div className="mb-4">
             <div className="flex justify-between items-center mb-2">
               <label className="text-sm font-medium text-orange-300">
-                ₿ Stable Crypto (BTC/ETH/Blue Chips)
+                ₿ Stable Crypto (BTC as store of value against M2 supply)
               </label>
               <span className="text-orange-400 font-bold">{(inputs.allocStable * 100).toFixed(0)}%</span>
             </div>
@@ -140,7 +140,7 @@ const SimulationInputs = ({
               }}
             />
             <div className="text-xs text-slate-400 mt-1">
-              Moderate growth with lower volatility
+              BTC/ETH/Blue Chips - hedge against inflation
             </div>
           </div>
 
@@ -148,7 +148,7 @@ const SimulationInputs = ({
           <div className="mb-4">
             <div className="flex justify-between items-center mb-2">
               <label className="text-sm font-medium text-green-300">
-                💵 TradFi (Cash/Bonds/Index Funds)
+                💵 TradFi (Cash/Bonds/Index Funds/ZUS pension)
               </label>
               <span className="text-green-400 font-bold">{(inputs.allocCash * 100).toFixed(0)}%</span>
             </div>
@@ -165,7 +165,7 @@ const SimulationInputs = ({
               }}
             />
             <div className="text-xs text-slate-400 mt-1">
-              Boring but stable safety net
+              Traditional investments - locked until retirement
             </div>
           </div>
 
@@ -173,7 +173,7 @@ const SimulationInputs = ({
           <div className="mb-4">
             <div className="flex justify-between items-center mb-2">
               <label className="text-sm font-medium text-purple-300">
-                🧠 Self Investment (Skills/Health/Sleep)
+                🧠 Self Investment (Skills/Health/Hobbies)
               </label>
               <span className="text-purple-400 font-bold">{(inputs.allocSelf * 100).toFixed(0)}%</span>
             </div>
