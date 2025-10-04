@@ -13,18 +13,18 @@ const GoalProgress = ({ simulationResult, inputs }) => {
     );
   }
 
-  const { timeline, finalSavings, goalAchievedAge, yearsToGoal } = simulationResult;
+  const { timeline, finalWealth, goalAchievedAge, yearsToGoal } = simulationResult;
   const currentProgress = calculateGoalProgress(
     inputs.ageStart,
-    timeline[0]?.savings || 0,
+    timeline[0]?.totalWealth || 0,
     inputs.goalAmount
   );
   const goalProgress = calculateGoalProgress(
     65,
-    finalSavings,
+    finalWealth,
     inputs.goalAmount
   );
-  const freedomMetrics = calculateFreedomMetrics(finalSavings, inputs.monthlyIncome);
+  const freedomMetrics = calculateFreedomMetrics(finalWealth, inputs.annualIncome || inputs.monthlyIncome * 12);
 
   const formatCurrency = (value) => {
     if (value >= 1000000) {
@@ -35,7 +35,7 @@ const GoalProgress = ({ simulationResult, inputs }) => {
     return `$${value.toLocaleString()}`;
   };
 
-  const progressPercentage = (finalSavings / inputs.goalAmount) * 100;
+  const progressPercentage = (finalWealth / inputs.goalAmount) * 100;
   const clampedProgress = Math.min(progressPercentage, 100);
 
   return (
@@ -98,8 +98,8 @@ const GoalProgress = ({ simulationResult, inputs }) => {
       {/* Key Metrics Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
         <div className="bg-slate-700 p-4 rounded-lg">
-          <div className="text-slate-400 text-sm mb-1">Savings at Retirement (65)</div>
-          <div className="text-white text-xl font-bold">{formatCurrency(finalSavings)}</div>
+          <div className="text-slate-400 text-sm mb-1">Wealth at Retirement (65)</div>
+          <div className="text-white text-xl font-bold">{formatCurrency(finalWealth)}</div>
         </div>
         <div className="bg-slate-700 p-4 rounded-lg">
           <div className="text-slate-400 text-sm mb-1">Monthly Passive Income</div>

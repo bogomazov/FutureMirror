@@ -27,17 +27,21 @@ const WealthChart = ({ timeline, goalAmount, currentScenario }) => {
   if (!timeline || timeline.length === 0) {
     return (
       <div className="bg-slate-800 p-6 rounded-lg border border-slate-700">
-        <h3 className="text-lg font-semibold text-white mb-4">📈 Wealth Over Time</h3>
+        <h3 className="text-lg font-semibold text-white mb-4">📈 Portfolio Growth Over Time</h3>
         <div className="h-64 flex items-center justify-center text-slate-400">
-          Run a simulation to see your wealth projection
+          Run a simulation to see your portfolio projection
         </div>
       </div>
     );
   }
 
   const ages = timeline.map(point => point.age);
-  const savingsData = timeline.map(point => point.savings);
-  const gamblingData = timeline.map(point => point.gambling);
+  const riskyData = timeline.map(point => point.risky || 0);
+  const stableData = timeline.map(point => point.stable || 0);
+  const cashData = timeline.map(point => point.cash || 0);
+  const totalWealthData = timeline.map(point => point.totalWealth || 0);
+  const stressData = timeline.map(point => point.stress || 0);
+  const sleeplessNights = timeline.filter(point => point.sleeplessNights).length;
 
   const formatCurrency = (value) => {
     if (value >= 1000000) {
@@ -52,31 +56,54 @@ const WealthChart = ({ timeline, goalAmount, currentScenario }) => {
     labels: ages,
     datasets: [
       {
-        label: 'Consistent Savings Path',
-        data: savingsData,
+        label: '💵 TradFi (Cash/Bonds)',
+        data: cashData,
+        backgroundColor: 'rgba(16, 185, 129, 0.8)',
+        borderColor: 'rgb(16, 185, 129)',
+        borderWidth: 1,
+        fill: true,
+        tension: 0.4,
+        pointRadius: 0,
+        pointHoverRadius: 4,
+        stack: 'portfolio'
+      },
+      {
+        label: '₿ Stable Crypto (BTC/ETH)',
+        data: stableData,
+        backgroundColor: 'rgba(249, 115, 22, 0.8)',
+        borderColor: 'rgb(249, 115, 22)',
+        borderWidth: 1,
+        fill: true,
+        tension: 0.4,
+        pointRadius: 0,
+        pointHoverRadius: 4,
+        stack: 'portfolio'
+      },
+      {
+        label: '🎲 Risky Trades (Degen)',
+        data: riskyData,
+        backgroundColor: 'rgba(239, 68, 68, 0.8)',
+        borderColor: 'rgb(239, 68, 68)',
+        borderWidth: 1,
+        fill: true,
+        tension: 0.4,
+        pointRadius: 0,
+        pointHoverRadius: 4,
+        stack: 'portfolio'
+      },
+      {
+        label: 'Total Portfolio Value',
+        data: totalWealthData,
         borderColor: 'rgb(20, 184, 166)',
         backgroundColor: 'rgba(20, 184, 166, 0.1)',
         borderWidth: 3,
-        fill: true,
+        fill: false,
         tension: 0.4,
-        pointRadius: 2,
+        pointRadius: 1,
         pointHoverRadius: 6,
         pointBackgroundColor: 'rgb(20, 184, 166)',
         pointBorderColor: 'rgb(20, 184, 166)',
-      },
-      {
-        label: 'Gambling/Risk Path',
-        data: gamblingData,
-        borderColor: 'rgb(239, 68, 68)',
-        backgroundColor: 'rgba(239, 68, 68, 0.1)',
-        borderWidth: 3,
-        fill: false,
-        tension: 0.4,
-        pointRadius: 2,
-        pointHoverRadius: 6,
-        pointBackgroundColor: 'rgb(239, 68, 68)',
-        pointBorderColor: 'rgb(239, 68, 68)',
-        borderDash: [5, 5],
+        type: 'line'
       }
     ]
   };
@@ -112,12 +139,30 @@ const WealthChart = ({ timeline, goalAmount, currentScenario }) => {
             return `${label}: ${value}`;
           },
           afterBody: function(tooltipItems) {
+            const dataIndex = tooltipItems[0].dataIndex;
             const age = tooltipItems[0].label;
-            const goalReached = timeline[tooltipItems[0].dataIndex]?.goalAchieved;
-            if (goalReached) {
-              return [`🎯 Goal achieved at age ${age}!`];
+            const point = timeline[dataIndex];
+
+            if (!point) return [];
+
+            const extraInfo = [];
+
+            if (point.goalAchieved) {
+              extraInfo.push(`🎯 Goal achieved at age ${age}!`);
             }
-            return [];
+
+            if (point.sleeplessNights) {
+              extraInfo.push(`😵‍💫 Sleepless nights from stress (${point.stress})`);
+            }
+
+            if (point.stress > 70) {
+              extraInfo.push(`⚠️ High stress reduces income growth`);
+            }
+
+            extraInfo.push(`❤️ Health: ${point.health}/100`);
+            extraInfo.push(`🙂 Happiness: ${point.happiness}/100`);
+
+            return extraInfo;
           }
         }
       }
@@ -207,21 +252,24 @@ const WealthChart = ({ timeline, goalAmount, currentScenario }) => {
 
   return (
     <div className="bg-slate-800 p-6 rounded-lg border border-slate-700">
-      <h3 className="text-lg font-semibold text-white mb-4">
-        📈 Wealth Over Time
-        {currentScenario && (
-          <span className="ml-2 text-sm text-slate-400">
-            (Savings Rate: {(currentScenario * 100).toFixed(0)}%)
-          </span>
+      <div className="flex justify-between items-center mb-4">
+        <h3 className="text-lg font-semibold text-white">
+          📈 Portfolio Growth Over Time
+        </h3>
+        {sleeplessNights > 0 && (
+          <div className="flex items-center gap-2 text-red-400">
+            <span className="animate-pulse">😵‍💫</span>
+            <span className="text-sm">{sleeplessNights} sleepless years</span>
+          </div>
         )}
-      </h3>
+      </div>
 
       <div className="h-80 mb-4">
         <Line data={data} options={options} />
       </div>
 
       {goalAmount > 0 && (
-        <div className="flex items-center justify-center text-sm text-slate-400">
+        <div className="flex items-center justify-center text-sm text-slate-400 mb-4">
           <div className="flex items-center gap-2">
             <div className="w-4 h-0.5 bg-yellow-500 border-dashed"></div>
             <span>Goal: {formatCurrency(goalAmount)}</span>
@@ -229,20 +277,40 @@ const WealthChart = ({ timeline, goalAmount, currentScenario }) => {
         </div>
       )}
 
-      <div className="grid grid-cols-2 gap-4 mt-4 text-center">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-center">
         <div className="bg-slate-700 p-3 rounded-lg">
-          <div className="text-teal-400 font-semibold">Savings Final Value</div>
+          <div className="text-green-400 font-semibold text-sm">💵 TradFi</div>
           <div className="text-white text-lg font-bold">
-            {formatCurrency(savingsData[savingsData.length - 1] || 0)}
+            {formatCurrency(cashData[cashData.length - 1] || 0)}
           </div>
         </div>
         <div className="bg-slate-700 p-3 rounded-lg">
-          <div className="text-red-400 font-semibold">Gambling Final Value</div>
+          <div className="text-orange-400 font-semibold text-sm">₿ Stable</div>
           <div className="text-white text-lg font-bold">
-            {formatCurrency(gamblingData[gamblingData.length - 1] || 0)}
+            {formatCurrency(stableData[stableData.length - 1] || 0)}
+          </div>
+        </div>
+        <div className="bg-slate-700 p-3 rounded-lg">
+          <div className="text-red-400 font-semibold text-sm">🎲 Risky</div>
+          <div className="text-white text-lg font-bold">
+            {formatCurrency(riskyData[riskyData.length - 1] || 0)}
+          </div>
+        </div>
+        <div className="bg-slate-700 p-3 rounded-lg border-2 border-teal-500">
+          <div className="text-teal-400 font-semibold text-sm">💎 Total</div>
+          <div className="text-white text-lg font-bold">
+            {formatCurrency(totalWealthData[totalWealthData.length - 1] || 0)}
           </div>
         </div>
       </div>
+
+      {sleeplessNights > 0 && (
+        <div className="mt-4 p-3 bg-red-900/20 border border-red-700/50 rounded-lg">
+          <div className="text-red-400 text-sm text-center">
+            💡 <strong>APY of peace > APY of panic</strong> - High stress cost you {sleeplessNights} years of quality sleep
+          </div>
+        </div>
+      )}
     </div>
   );
 };

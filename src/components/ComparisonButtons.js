@@ -1,10 +1,28 @@
 import React from 'react';
 
-const ComparisonButtons = ({ currentRate, onRateChange, simulationResults }) => {
-  const comparisonRates = [
-    { rate: 0.10, label: '10%', description: 'Conservative' },
-    { rate: 0.20, label: '20%', description: 'Moderate' },
-    { rate: 0.40, label: '40%', description: 'Aggressive' }
+const ComparisonButtons = ({ currentScenario, onScenarioChange, simulationResults }) => {
+  const comparisonScenarios = [
+    {
+      key: 'degen',
+      label: 'All In Risk',
+      description: 'YOLO Degen Mode',
+      emoji: '🎲',
+      allocation: { risk: 70, stable: 15, cash: 10, self: 5 }
+    },
+    {
+      key: 'balanced',
+      label: 'Balanced',
+      description: 'Moderate Risk',
+      emoji: '⚖️',
+      allocation: { risk: 25, stable: 30, cash: 25, self: 20 }
+    },
+    {
+      key: 'lockin',
+      label: 'Lock-In Life',
+      description: 'Peace & Stability',
+      emoji: '🔒',
+      allocation: { risk: 5, stable: 35, cash: 30, self: 30 }
+    }
   ];
 
   const formatCurrency = (value) => {
@@ -16,23 +34,37 @@ const ComparisonButtons = ({ currentRate, onRateChange, simulationResults }) => 
     return `$${value.toLocaleString()}`;
   };
 
-  const getYearsToGoal = (rate) => {
-    const result = simulationResults?.[rate];
+  const getScenarioKey = (scenario) => {
+    const { risk, stable, cash, self } = scenario.allocation;
+    return `${risk / 100}-${stable / 100}-${cash / 100}-${self / 100}`;
+  };
+
+  const getYearsToGoal = (scenario) => {
+    const key = getScenarioKey(scenario);
+    const result = simulationResults?.[key];
     return result?.yearsToGoal || null;
   };
 
-  const getFinalWealth = (rate) => {
-    const result = simulationResults?.[rate];
-    return result?.finalSavings || 0;
+  const getFinalWealth = (scenario) => {
+    const key = getScenarioKey(scenario);
+    const result = simulationResults?.[key];
+    return result?.finalWealth || 0;
   };
 
-  const getButtonStyle = (rate) => {
-    const isActive = rate === currentRate;
-    const result = simulationResults?.[rate];
+  const getSleeplessYears = (scenario) => {
+    const key = getScenarioKey(scenario);
+    const result = simulationResults?.[key];
+    return result?.sleeplessYears || 0;
+  };
+
+  const getButtonStyle = (scenario) => {
+    const isActive = scenario.key === currentScenario;
+    const key = getScenarioKey(scenario);
+    const result = simulationResults?.[key];
     const hasResult = result && result.timeline && result.timeline.length > 0;
 
     if (isActive) {
-      return 'bg-teal-600 text-white border-teal-500 shadow-lg transform scale-105';
+      return 'bg-purple-600 text-white border-purple-500 shadow-lg transform scale-105';
     } else if (hasResult) {
       return 'bg-slate-700 text-white border-slate-600 hover:bg-slate-600 hover:border-slate-500';
     } else {
@@ -43,27 +75,35 @@ const ComparisonButtons = ({ currentRate, onRateChange, simulationResults }) => 
   return (
     <div className="bg-slate-800 p-6 rounded-lg border border-slate-700">
       <h3 className="text-lg font-semibold text-white mb-4 text-center">
-        🔁 Compare Savings Scenarios
+        🔁 Compare Life Scenarios
       </h3>
       <p className="text-slate-400 text-sm text-center mb-6">
-        Click to see how different savings rates change your future
+        See how different allocation strategies shape your future
       </p>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {comparisonRates.map((scenario) => {
-          const yearsToGoal = getYearsToGoal(scenario.rate);
-          const finalWealth = getFinalWealth(scenario.rate);
-          const isActive = scenario.rate === currentRate;
+        {comparisonScenarios.map((scenario) => {
+          const yearsToGoal = getYearsToGoal(scenario);
+          const finalWealth = getFinalWealth(scenario);
+          const sleeplessYears = getSleeplessYears(scenario);
+          const isActive = scenario.key === currentScenario;
 
           return (
             <button
-              key={scenario.rate}
-              onClick={() => onRateChange(scenario.rate)}
-              className={`p-4 rounded-lg border-2 transition-all duration-200 text-left ${getButtonStyle(scenario.rate)}`}
+              key={scenario.key}
+              onClick={() => onScenarioChange(scenario.key)}
+              className={`p-4 rounded-lg border-2 transition-all duration-200 text-left ${getButtonStyle(scenario)}`}
             >
               <div className="text-center mb-3">
-                <div className="text-2xl font-bold mb-1">{scenario.label}</div>
+                <div className="text-3xl mb-2">{scenario.emoji}</div>
+                <div className="text-lg font-bold mb-1">{scenario.label}</div>
                 <div className="text-sm opacity-75">{scenario.description}</div>
+              </div>
+
+              {/* Allocation Breakdown */}
+              <div className="text-xs text-center mb-3 opacity-75">
+                <div>🎲 {scenario.allocation.risk}% • ₿ {scenario.allocation.stable}%</div>
+                <div>💵 {scenario.allocation.cash}% • 🧠 {scenario.allocation.self}%</div>
               </div>
 
               {finalWealth > 0 && (
@@ -84,9 +124,18 @@ const ComparisonButtons = ({ currentRate, onRateChange, simulationResults }) => 
                     </div>
                   )}
 
+                  {sleeplessYears > 0 && (
+                    <div className="text-center">
+                      <div className="text-xs opacity-75 mb-1">Sleepless Years</div>
+                      <div className="font-semibold text-sm text-red-400">
+                        😵‍💫 {sleeplessYears} years
+                      </div>
+                    </div>
+                  )}
+
                   {!yearsToGoal && (
                     <div className="text-center">
-                      <div className="text-xs opacity-75">Goal not reached</div>
+                      <div className="text-xs opacity-75 text-red-400">Goal not reached</div>
                     </div>
                   )}
                 </div>
@@ -114,21 +163,26 @@ const ComparisonButtons = ({ currentRate, onRateChange, simulationResults }) => 
       {/* Quick Insights */}
       {simulationResults && Object.keys(simulationResults).length > 1 && (
         <div className="mt-6 p-4 bg-slate-700/50 rounded-lg">
-          <h4 className="text-white font-semibold mb-3 text-center">💡 Quick Insights</h4>
+          <h4 className="text-white font-semibold mb-3 text-center">💡 Scenario Insights</h4>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-            {comparisonRates.map((scenario) => {
-              const result = simulationResults[scenario.rate];
+            {comparisonScenarios.map((scenario) => {
+              const key = getScenarioKey(scenario);
+              const result = simulationResults[key];
               if (!result) return null;
 
-              const finalWealth = result.finalSavings;
+              const finalWealth = result.finalWealth;
               const yearsToGoal = result.yearsToGoal;
+              const sleeplessYears = result.sleeplessYears;
 
               return (
-                <div key={scenario.rate} className="text-center">
-                  <div className="text-slate-300 mb-1">{scenario.label} Savings</div>
+                <div key={scenario.key} className="text-center">
+                  <div className="text-slate-300 mb-1">{scenario.emoji} {scenario.label}</div>
                   <div className="text-white font-bold">{formatCurrency(finalWealth)}</div>
                   {yearsToGoal && (
                     <div className="text-teal-400 text-xs">Goal in {yearsToGoal}y</div>
+                  )}
+                  {sleeplessYears > 0 && (
+                    <div className="text-red-400 text-xs">😵‍💫 {sleeplessYears}y sleepless</div>
                   )}
                 </div>
               );
@@ -140,7 +194,7 @@ const ComparisonButtons = ({ currentRate, onRateChange, simulationResults }) => 
       {/* Call to Action */}
       <div className="mt-4 text-center">
         <p className="text-slate-400 text-sm">
-          Higher savings rates dramatically accelerate your path to financial freedom
+          💡 <span className="text-purple-400 font-semibold">The most bullish position is 8 hours of sleep</span>
         </p>
       </div>
     </div>

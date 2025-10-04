@@ -4,22 +4,23 @@ import WealthChart from './components/WealthChart';
 import GoalProgress from './components/GoalProgress';
 import FutureSelfSnapshot from './components/FutureSelfSnapshot';
 import ComparisonButtons from './components/ComparisonButtons';
-import { simulateLife } from './utils/simulation';
+import { simulateCryptoLife } from './utils/simulation';
 
 function App() {
   const [inputs, setInputs] = useState({
     ageStart: 25,
     ageEnd: 65,
-    monthlyIncome: 2000,
-    savingsRate: 0.10,
-    riskRate: 0.00,
-    yieldRate: 0.05,
-    goalAmount: 100000
+    annualIncome: 30000,
+    allocRisk: 0.30,      // 30% risky trades
+    allocStable: 0.20,    // 20% stable crypto
+    allocCash: 0.20,      // 20% cash/bonds
+    allocSelf: 0.10,      // 10% self investment
+    goalAmount: 500000
   });
 
   const [simulationResult, setSimulationResult] = useState(null);
   const [simulationResults, setSimulationResults] = useState({});
-  const [currentScenario, setCurrentScenario] = useState(0.10);
+  const [currentScenario, setCurrentScenario] = useState('balanced');
 
   const handleInputChange = (field, value) => {
     setInputs(prev => ({
@@ -30,30 +31,45 @@ function App() {
 
   const runSimulation = (customInputs = null) => {
     const simulationInputs = customInputs || inputs;
-    const result = simulateLife(simulationInputs);
+    const result = simulateCryptoLife(simulationInputs);
     setSimulationResult(result);
 
-    // Store result for the current savings rate
+    // Store result for the current scenario
+    const scenarioKey = getScenarioKey(simulationInputs);
     setSimulationResults(prev => ({
       ...prev,
-      [simulationInputs.savingsRate]: result
+      [scenarioKey]: result
     }));
 
     return result;
   };
 
-  const handleScenarioChange = (newRate) => {
-    setCurrentScenario(newRate);
+  const getScenarioKey = (inputParams) => {
+    const { allocRisk, allocStable, allocCash, allocSelf } = inputParams;
+    return `${allocRisk}-${allocStable}-${allocCash}-${allocSelf}`;
+  };
 
-    // Check if we already have simulation for this rate
-    if (simulationResults[newRate]) {
-      setSimulationResult(simulationResults[newRate]);
-      setInputs(prev => ({ ...prev, savingsRate: newRate }));
-    } else {
-      // Run new simulation with the new rate
-      const newInputs = { ...inputs, savingsRate: newRate };
+  const presetScenarios = {
+    'degen': { allocRisk: 0.70, allocStable: 0.15, allocCash: 0.10, allocSelf: 0.05 },
+    'balanced': { allocRisk: 0.25, allocStable: 0.30, allocCash: 0.25, allocSelf: 0.20 },
+    'lockin': { allocRisk: 0.05, allocStable: 0.35, allocCash: 0.30, allocSelf: 0.30 }
+  };
+
+  const handleScenarioChange = (scenarioName) => {
+    setCurrentScenario(scenarioName);
+    const scenario = presetScenarios[scenarioName];
+
+    if (scenario) {
+      const newInputs = { ...inputs, ...scenario };
       setInputs(newInputs);
-      runSimulation(newInputs);
+
+      // Check if we already have simulation for this scenario
+      const scenarioKey = getScenarioKey(newInputs);
+      if (simulationResults[scenarioKey]) {
+        setSimulationResult(simulationResults[scenarioKey]);
+      } else {
+        runSimulation(newInputs);
+      }
     }
   };
 
@@ -64,7 +80,7 @@ function App() {
     }, 500);
 
     return () => clearTimeout(timer);
-  }, [inputs.ageStart, inputs.monthlyIncome, inputs.goalAmount, inputs.riskRate]);
+  }, [inputs.ageStart, inputs.annualIncome, inputs.goalAmount, inputs.allocRisk, inputs.allocStable, inputs.allocCash, inputs.allocSelf]);
 
   // Run initial simulation on mount
   useEffect(() => {
@@ -77,12 +93,13 @@ function App() {
         {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
-            🔮 Future Mirror
+            🚀 WEB3 LIFE SIMULATOR
           </h1>
-          <p className="text-xl text-slate-300 mb-2">Life Path Visualizer</p>
-          <p className="text-slate-400 max-w-2xl mx-auto">
-            See how your financial choices today shape your future.
-            Discover the power of consistent saving vs. the risks of gambling.
+          <p className="text-xl text-slate-300 mb-2">See How Your Allocation Ripples Across Decades</p>
+          <p className="text-slate-400 max-w-3xl mx-auto">
+            Every spike you chase costs you a night of sleep.
+            The most bullish position is 8 hours of sleep.
+            <span className="text-purple-400 font-semibold"> APY of peace > APY of panic.</span>
           </p>
         </div>
 
@@ -97,8 +114,8 @@ function App() {
             />
 
             <ComparisonButtons
-              currentRate={currentScenario}
-              onRateChange={handleScenarioChange}
+              currentScenario={currentScenario}
+              onScenarioChange={handleScenarioChange}
               simulationResults={simulationResults}
             />
           </div>
@@ -130,20 +147,19 @@ function App() {
         {/* Footer */}
         <div className="mt-12 text-center">
           <div className="bg-slate-800/50 backdrop-blur-sm rounded-lg p-6 border border-slate-700">
-            <h3 className="text-white font-semibold mb-3">💡 About Future Mirror</h3>
+            <h3 className="text-white font-semibold mb-3">💡 The Real Alpha</h3>
             <p className="text-slate-300 text-sm leading-relaxed max-w-4xl mx-auto">
-              This tool helps you visualize the long-term impact of your financial decisions.
-              By showing the stark contrast between consistent saving and high-risk behavior,
-              it empowers you to make informed choices about your financial future.
-              The simulations use realistic compound interest calculations and gambling loss models
-              to provide accurate projections.
+              Built for Web3 gamblers to visualize how allocation choices ripple across decades.
+              When you crank the 'risk' slider, wealth might spike — but health and sleep collapse.
+              When you invest in yourself and balance risk, stress drops and the curve smooths.
+              <span className="text-teal-400 font-semibold"> You can't 100× if you 0× your health.</span>
             </p>
             <div className="mt-4 flex justify-center items-center gap-4 text-xs text-slate-400">
-              <span>Built with React & Chart.js</span>
+              <span>🔥 Stablecoins are for your wallet</span>
               <span>•</span>
-              <span>Open Source</span>
+              <span>💤 Stability is for your mind</span>
               <span>•</span>
-              <span>Educational Tool</span>
+              <span>📈 Data-driven mirror</span>
             </div>
           </div>
         </div>

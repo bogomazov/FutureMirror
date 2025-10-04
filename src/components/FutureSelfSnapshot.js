@@ -13,16 +13,18 @@ const FutureSelfSnapshot = ({ simulationResult, inputs }) => {
     );
   }
 
-  const { finalSavings, finalGambling } = simulationResult;
+  const { finalWealth, finalRisky, avgStress, avgHealth, avgHappiness } = simulationResult;
 
-  // Calculate metrics for consistent saver
-  const saverFreedom = calculateFreedomMetrics(finalSavings, inputs.monthlyIncome);
-  const saverStress = calculateStressLevel(0, finalSavings);
-  const saverHealth = Math.max(40, 100 - saverStress);
+  // Calculate metrics for current path
+  const currentIncome = inputs.annualIncome || inputs.monthlyIncome * 12;
+  const saverFreedom = calculateFreedomMetrics(finalWealth, currentIncome);
+  const saverStress = avgStress || calculateStressLevel(inputs.allocRisk || 0, finalWealth);
+  const saverHealth = avgHealth || Math.max(40, 100 - saverStress);
 
-  // Calculate metrics for gambler (using high risk rate for comparison)
-  const gamblerFreedom = calculateFreedomMetrics(finalGambling, inputs.monthlyIncome);
-  const gamblerStress = calculateStressLevel(0.3, finalGambling); // Assume high stress from gambling
+  // Calculate metrics for high-risk comparison path
+  const highRiskWealth = finalRisky || 0;
+  const gamblerFreedom = calculateFreedomMetrics(highRiskWealth, currentIncome);
+  const gamblerStress = calculateStressLevel(0.7, highRiskWealth); // High risk stress
   const gamblerHealth = Math.max(20, 100 - gamblerStress);
 
   const formatCurrency = (value) => {
@@ -76,8 +78,8 @@ const FutureSelfSnapshot = ({ simulationResult, inputs }) => {
     }
   };
 
-  const saverScenario = getScenarioMessage(finalSavings, saverFreedom.freedomScore, saverStress);
-  const gamblerScenario = getScenarioMessage(finalGambling, gamblerFreedom.freedomScore, gamblerStress);
+  const saverScenario = getScenarioMessage(finalWealth, saverFreedom.freedomScore, saverStress);
+  const gamblerScenario = getScenarioMessage(highRiskWealth, gamblerFreedom.freedomScore, gamblerStress);
 
   return (
     <div className="bg-slate-800 p-6 rounded-lg border border-slate-700">
@@ -96,7 +98,7 @@ const FutureSelfSnapshot = ({ simulationResult, inputs }) => {
             {/* Wealth */}
             <div className="flex justify-between items-center">
               <span className="text-slate-300">💰 Final Wealth</span>
-              <span className="text-white font-bold text-lg">{formatCurrency(finalSavings)}</span>
+              <span className="text-white font-bold text-lg">{formatCurrency(finalWealth)}</span>
             </div>
 
             {/* Health Score */}
@@ -167,7 +169,7 @@ const FutureSelfSnapshot = ({ simulationResult, inputs }) => {
             {/* Wealth */}
             <div className="flex justify-between items-center">
               <span className="text-slate-300">💸 Final Wealth</span>
-              <span className="text-white font-bold text-lg">{formatCurrency(finalGambling)}</span>
+              <span className="text-white font-bold text-lg">{formatCurrency(highRiskWealth)}</span>
             </div>
 
             {/* Health Score */}
