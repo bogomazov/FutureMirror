@@ -116,19 +116,19 @@ function App() {
         {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
-            🏃 FREEDOM RUN SIMULATOR
+            🔮 FUTURE MIRROR
           </h1>
           <p className="text-xl text-slate-300 mb-2">
-            See How Your Allocation Ripples Across Decades
+            See your life before it gets rekt.
           </p>
-          <p className="text-slate-400 max-w-3xl mx-auto">
-            Every spike you chase costs you a night of sleep. The most bullish
-            position is 8 hours of sleep.
+          {/* <p className="text-slate-400 max-w-3xl mx-auto">
+            Every gambler chases the next 1000×. But the only guaranteed 1000× is you — your skills, health, peace, focus.
+            The longer you hold and compound yourself, the rarer your coin becomes.
             <span className="text-purple-400 font-semibold">
               {" "}
-              APY of peace > APY of panic.
+              Sleep = staking. Learning = yield. Discipline = protocol security.
             </span>
-          </p>
+          </p> */}
         </div>
 
         {/* Main Layout */}
@@ -179,11 +179,13 @@ function App() {
             <p className="text-slate-300 text-sm leading-relaxed max-w-4xl mx-auto">
               Built for Web3 gamblers to visualize how allocation choices ripple
               across decades. When you crank the 'risk' slider, wealth might
-              spike — but health and sleep collapse. When you invest in yourself
-              and balance risk, stress drops and the curve smooths.
+              spike — but health and income growth collapse. When you invest in
+              yourself, stress drops, income compounds, and the curve smooths
+              into exponential growth.
               <span className="text-teal-400 font-semibold">
                 {" "}
-                You can't 100× if you 0× your health.
+                "Invest in Self" grows slower short-term, but compounds way
+                harder later.
               </span>
             </p>
             <div className="mt-4 flex justify-center items-center gap-4 text-xs text-slate-400">

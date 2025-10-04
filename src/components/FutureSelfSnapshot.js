@@ -13,7 +13,7 @@ const FutureSelfSnapshot = ({ simulationResult, inputs }) => {
     );
   }
 
-  const { finalWealth, finalRisky, avgStress, avgHealth, avgHappiness } = simulationResult;
+  const { finalWealth, finalRisky, avgStress, avgHealth, avgHappiness, sleeplessYears, timeline } = simulationResult;
 
   // Calculate metrics for current path
   const currentIncome = inputs.annualIncome || inputs.monthlyIncome * 12;
@@ -36,6 +36,26 @@ const FutureSelfSnapshot = ({ simulationResult, inputs }) => {
     return `$${value.toLocaleString()}`;
   };
 
+  // Calculate present-day value (assuming 3% inflation)
+  const calculatePresentValue = (futureValue, years) => {
+    const inflationRate = 0.03;
+    return futureValue / Math.pow(1 + inflationRate, years);
+  };
+
+  const yearsToEnd = inputs.ageEnd - inputs.ageStart;
+
+  const getSleepQuality = (stress, sleeplessYears, totalYears) => {
+    if (sleeplessYears >= totalYears * 0.5) {
+      return { emoji: '😵', quality: 'Chronic Insomnia', color: 'text-red-400' };
+    } else if (sleeplessYears >= totalYears * 0.3) {
+      return { emoji: '😴', quality: 'Poor Sleep', color: 'text-orange-400' };
+    } else if (sleeplessYears >= totalYears * 0.1) {
+      return { emoji: '😐', quality: 'Restless Nights', color: 'text-yellow-400' };
+    } else {
+      return { emoji: '😴', quality: 'Good Sleep', color: 'text-green-400' };
+    }
+  };
+
   const getHealthColor = (health) => {
     if (health >= 80) return 'text-green-400';
     if (health >= 60) return 'text-yellow-400';
@@ -50,36 +70,45 @@ const FutureSelfSnapshot = ({ simulationResult, inputs }) => {
     return 'text-red-400';
   };
 
-  const getScenarioMessage = (wealth, freedom, stress) => {
-    if (wealth >= 500000 && freedom >= 80) {
+  const getScenarioMessage = (wealth, freedom, stress, health, sleepYears) => {
+    if (wealth >= 500000 && freedom >= 80 && health >= 80) {
       return {
         emoji: '🌟',
         title: 'Living the Dream',
-        message: 'Your future self can rest easy with financial security and peace of mind.'
+        message: 'Financial security, excellent health, and peaceful sleep. You invested in yourself and it paid off.'
       };
-    } else if (wealth >= 100000 && freedom >= 50) {
+    } else if (wealth >= 100000 && freedom >= 50 && health >= 60) {
       return {
         emoji: '😌',
-        title: 'Comfortable & Secure',
-        message: 'You\'ve built solid wealth with manageable stress levels.'
+        title: 'Comfortable & Healthy',
+        message: 'Solid wealth with good health. Manageable stress levels let you sleep well.'
       };
-    } else if (wealth >= 50000) {
+    } else if (wealth >= 50000 && health >= 40) {
       return {
         emoji: '😐',
         title: 'Getting By',
-        message: 'Some security achieved, but retirement may be challenging.'
+        message: 'Some security achieved, but health starting to suffer from years of stress.'
+      };
+    } else if (stress >= 70 || sleepYears >= yearsToEnd * 0.3) {
+      return {
+        emoji: '🤒',
+        title: 'Health Crisis',
+        message: 'High stress led to chronic sleep issues and serious health problems. Wealth can\'t buy back your health.'
       };
     } else {
       return {
         emoji: '😰',
         title: 'Struggling',
-        message: 'Limited financial security with high stress and uncertainty.'
+        message: 'Limited financial security with declining health and constant worry about the future.'
       };
     }
   };
 
-  const saverScenario = getScenarioMessage(finalWealth, saverFreedom.freedomScore, saverStress);
-  const gamblerScenario = getScenarioMessage(highRiskWealth, gamblerFreedom.freedomScore, gamblerStress);
+  const saverSleepQuality = getSleepQuality(saverStress, sleeplessYears || 0, yearsToEnd);
+  const gamblerSleepQuality = getSleepQuality(gamblerStress, Math.round(yearsToEnd * 0.6), yearsToEnd); // Assume 60% sleepless years for high risk
+
+  const saverScenario = getScenarioMessage(finalWealth, saverFreedom.freedomScore, saverStress, saverHealth, sleeplessYears || 0);
+  const gamblerScenario = getScenarioMessage(highRiskWealth, gamblerFreedom.freedomScore, gamblerStress, gamblerHealth, Math.round(yearsToEnd * 0.6));
 
   return (
     <div className="bg-slate-800 p-6 rounded-lg border border-slate-700">
@@ -141,12 +170,27 @@ const FutureSelfSnapshot = ({ simulationResult, inputs }) => {
               </div>
             </div>
 
+            {/* Sleep Quality */}
+            <div className="flex justify-between items-center">
+              <span className="text-slate-300">😴 Sleep Quality</span>
+              <div className="flex items-center gap-2">
+                <span className={`font-bold ${saverSleepQuality.color}`}>
+                  {saverSleepQuality.emoji} {saverSleepQuality.quality}
+                </span>
+              </div>
+            </div>
+
             {/* Monthly Passive Income */}
             <div className="flex justify-between items-center">
-              <span className="text-slate-300">💳 Monthly Income</span>
-              <span className="text-green-400 font-bold">
-                {formatCurrency(saverFreedom.monthlyPassiveIncome)}
-              </span>
+              <span className="text-slate-300">💳 Monthly Passive Income</span>
+              <div className="text-right">
+                <div className="text-green-400 font-bold">
+                  {formatCurrency(saverFreedom.monthlyPassiveIncome)}
+                </div>
+                <div className="text-xs text-slate-400">
+                  ({formatCurrency(calculatePresentValue(saverFreedom.monthlyPassiveIncome, yearsToEnd))} in today's money)
+                </div>
+              </div>
             </div>
           </div>
 
@@ -212,12 +256,27 @@ const FutureSelfSnapshot = ({ simulationResult, inputs }) => {
               </div>
             </div>
 
+            {/* Sleep Quality */}
+            <div className="flex justify-between items-center">
+              <span className="text-slate-300">😴 Sleep Quality</span>
+              <div className="flex items-center gap-2">
+                <span className={`font-bold ${gamblerSleepQuality.color}`}>
+                  {gamblerSleepQuality.emoji} {gamblerSleepQuality.quality}
+                </span>
+              </div>
+            </div>
+
             {/* Monthly Passive Income */}
             <div className="flex justify-between items-center">
-              <span className="text-slate-300">💳 Monthly Income</span>
-              <span className="text-red-400 font-bold">
-                {formatCurrency(gamblerFreedom.monthlyPassiveIncome)}
-              </span>
+              <span className="text-slate-300">💳 Monthly Passive Income</span>
+              <div className="text-right">
+                <div className="text-red-400 font-bold">
+                  {formatCurrency(gamblerFreedom.monthlyPassiveIncome)}
+                </div>
+                <div className="text-xs text-slate-400">
+                  ({formatCurrency(calculatePresentValue(gamblerFreedom.monthlyPassiveIncome, yearsToEnd))} in today's money)
+                </div>
+              </div>
             </div>
           </div>
 
@@ -232,10 +291,11 @@ const FutureSelfSnapshot = ({ simulationResult, inputs }) => {
       {/* Bottom Action Section */}
       <div className="mt-6 p-4 bg-gradient-to-r from-teal-900/30 to-blue-900/30 border border-teal-700/50 rounded-lg text-center">
         <p className="text-white font-semibold mb-2">
-          💡 Your future is shaped by choices you make today
+          💡 High risk or lack of savings → High stress → Sleep issues → Health problems
         </p>
         <p className="text-slate-300 text-sm">
-          Consistent saving builds wealth, reduces stress, and creates the freedom to live life on your terms.
+          Left: chasing charts. Right: becoming the chart.
+          <span className="text-purple-400 font-semibold"> Sleep = staking. Learning = yield. Discipline = protocol security.</span>
         </p>
       </div>
     </div>

@@ -35,6 +35,14 @@ const GoalProgress = ({ simulationResult, inputs }) => {
     return `$${value.toLocaleString()}`;
   };
 
+  // Calculate present-day value (assuming 3% inflation)
+  const calculatePresentValue = (futureValue, years) => {
+    const inflationRate = 0.03;
+    return futureValue / Math.pow(1 + inflationRate, years);
+  };
+
+  const yearsToRetirement = inputs.ageEnd - inputs.ageStart;
+
   const progressPercentage = (finalWealth / inputs.goalAmount) * 100;
   const clampedProgress = Math.min(progressPercentage, 100);
 
@@ -104,7 +112,10 @@ const GoalProgress = ({ simulationResult, inputs }) => {
         <div className="bg-slate-700 p-4 rounded-lg">
           <div className="text-slate-400 text-sm mb-1">Monthly Passive Income</div>
           <div className="text-white text-xl font-bold">{formatCurrency(freedomMetrics.monthlyPassiveIncome)}</div>
-          <div className="text-xs text-slate-400">4% withdrawal rule</div>
+          <div className="text-xs text-slate-400">
+            ({formatCurrency(calculatePresentValue(freedomMetrics.monthlyPassiveIncome, yearsToRetirement))} in today's money)
+          </div>
+          <div className="text-xs text-slate-400 mt-1">4% withdrawal rule</div>
         </div>
       </div>
 

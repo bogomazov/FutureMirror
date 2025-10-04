@@ -45,18 +45,24 @@ export function simulateCryptoLife({
 
     totalWealth = riskyAssets + stableAssets + cashAssets;
 
-    // Self-investment boosts future income and life quality
-    const skillMultiplier = 1 + baseGrowth + (allocSelf * 0.04); // 4% bonus per 100% self allocation
+    // Self-investment boosts future income and life quality (the guaranteed 1000×)
+    const incomeGrowth = baseGrowth + (allocSelf * 0.05); // 5% bonus per 100% self allocation
+    const skillMultiplier = 1 + incomeGrowth;
     currentIncome *= skillMultiplier;
 
-    // Life quality impacts based on allocation
-    const stressFromRisk = allocRisk * 50; // max 50 stress from 100% risk
-    const healthFromSelf = allocSelf * 40; // max 40 health boost from 100% self
-    const happinessFromBalance = Math.max(0, 30 - Math.abs(allocRisk - 0.2) * 100); // happiness peaks at 20% risk
+    // Life quality impacts based on allocation (Sleep = staking, Learning = yield, Discipline = security)
+    const baseStress = 30; // baseline stress level
+    const stressFromRisk = allocRisk * 60; // max 60 stress from 100% risk
+    const healthFromSelf = allocSelf * 50; // max 50 health boost from 100% self
+    const happinessFromBalance = Math.max(0, 40 - Math.abs(allocRisk - 0.2) * 120); // happiness peaks at 20% risk
+
+    // Apply the formulas from your concept
+    const stressReduction = allocSelf * 40; // more balance → less burnout
+    const happinessBoost = allocSelf * 30; // better well-being
 
     health = clamp(health + healthFromSelf - (stressFromRisk * 0.3) + randNormal(0, 2), 20, 100);
-    stress = clamp(stress + stressFromRisk - (allocSelf * 30) + randNormal(0, 3), 0, 100);
-    happiness = clamp(happiness + happinessFromBalance + (allocSelf * 20) - (stressFromRisk * 0.2) + randNormal(0, 2), 10, 100);
+    stress = clamp(baseStress + stressFromRisk - stressReduction + randNormal(0, 3), 0, 100);
+    happiness = clamp(happiness + happinessFromBalance + happinessBoost - (stressFromRisk * 0.2) + randNormal(0, 2), 10, 100);
 
     // High stress reduces income growth (sleepless nights effect)
     if (stress > 70) {

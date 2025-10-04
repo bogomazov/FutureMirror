@@ -190,7 +190,7 @@ const SimulationInputs = ({
               }}
             />
             <div className="text-xs text-slate-400 mt-1">
-              Boosts future income & reduces stress
+              The guaranteed 1000× - compounds income growth & well-being
             </div>
           </div>
 
