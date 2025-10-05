@@ -1,6 +1,6 @@
 # 🔮 Future Mirror
 
-**📊 [View Project Presentation](https://docs.google.com/presentation/d/1OyH27jy8BqmxGlio_Ahe1osx2LZhC1zZw2rvP46hOC8/edit?usp=sharing)**
+**📊 [Presentation](https://docs.google.com/presentation/d/1OyH27jy8BqmxGlio_Ahe1osx2LZhC1zZw2rvP46hOC8/edit?usp=sharing)**
 
 **See your life before it gets rekt.**
 
