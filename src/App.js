@@ -3,6 +3,7 @@ import SimulationInputs from "./components/SimulationInputs";
 import WealthChart from "./components/WealthChart";
 import GoalProgress from "./components/GoalProgress";
 import FutureSelfSnapshot from "./components/FutureSelfSnapshot";
+import FutureSelfVisualizer from "./components/FutureSelfVisualizer";
 import ComparisonButtons from "./components/ComparisonButtons";
 import { simulateCryptoLife } from "./utils/simulation";
 
@@ -169,6 +170,12 @@ function App() {
                 />
               </div>
             </div>
+
+            {/* Future Self Visualizer */}
+            <FutureSelfVisualizer
+              simulationResult={simulationResult}
+              inputs={inputs}
+            />
           </div>
         </div>
 

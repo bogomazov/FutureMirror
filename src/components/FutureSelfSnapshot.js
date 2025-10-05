@@ -1,7 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { calculateFreedomMetrics, calculateStressLevel } from '../utils/simulation';
 
 const FutureSelfSnapshot = ({ simulationResult, inputs }) => {
+  const [showVisualMirror, setShowVisualMirror] = useState(false);
+
   if (!simulationResult) {
     return (
       <div className="bg-slate-800 p-6 rounded-lg border border-slate-700">
@@ -112,9 +114,59 @@ const FutureSelfSnapshot = ({ simulationResult, inputs }) => {
 
   return (
     <div className="bg-slate-800 p-6 rounded-lg border border-slate-700">
-      <h3 className="text-lg font-semibold text-white mb-6 text-center">🪞 Future Self Snapshot</h3>
+      <div className="flex items-center justify-between mb-6">
+        <h3 className="text-lg font-semibold text-white">🪞 Future Self Snapshot</h3>
+        <div className="flex items-center gap-2">
+          <span className="text-sm text-slate-400">Stats</span>
+          <button
+            onClick={() => setShowVisualMirror(!showVisualMirror)}
+            className={`relative w-12 h-6 rounded-full transition-colors ${
+              showVisualMirror ? 'bg-purple-600' : 'bg-slate-600'
+            }`}
+          >
+            <div
+              className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-transform ${
+                showVisualMirror ? 'transform translate-x-7' : 'transform translate-x-1'
+              }`}
+            />
+          </button>
+          <span className="text-sm text-slate-400">Visual</span>
+        </div>
+      </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      {showVisualMirror ? (
+        <div className="text-center">
+          <div className="bg-slate-700/50 p-6 rounded-lg">
+            <h4 className="text-white font-semibold mb-4">📸 Visual Future Mirror</h4>
+            <p className="text-slate-300 text-sm mb-4">
+              See how your choices shape your future appearance and environment
+            </p>
+            <p className="text-xs text-slate-400 mb-4">
+              This feature shows visual representations based on your simulation results:
+            </p>
+            <div className="grid grid-cols-2 gap-4 text-xs text-slate-400">
+              <div>
+                <div className="font-semibold text-red-400">High Stress Path:</div>
+                <div>• Dark circles, stress lines</div>
+                <div>• Cluttered trading setup</div>
+                <div>• Poor posture, fatigue</div>
+              </div>
+              <div>
+                <div className="font-semibold text-green-400">Balanced Path:</div>
+                <div>• Healthy glow, bright eyes</div>
+                <div>• Organized environment</div>
+                <div>• Confident posture</div>
+              </div>
+            </div>
+            <div className="mt-4 p-3 bg-purple-900/30 rounded-lg">
+              <p className="text-purple-300 text-sm">
+                💡 Use the full 📸 Future Self Mirror below to capture your photo and generate visual previews
+              </p>
+            </div>
+          </div>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Consistent Saver */}
         <div className="bg-gradient-to-br from-green-900/20 to-teal-900/20 border border-green-700/50 rounded-lg p-6">
           <div className="text-center mb-4">
@@ -287,6 +339,7 @@ const FutureSelfSnapshot = ({ simulationResult, inputs }) => {
           </div>
         </div>
       </div>
+      )}
 
       {/* Bottom Action Section */}
       <div className="mt-6 p-4 bg-gradient-to-r from-teal-900/30 to-blue-900/30 border border-teal-700/50 rounded-lg text-center">
